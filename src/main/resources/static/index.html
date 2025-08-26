@@ -6,8 +6,28 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <h1>🎮 Minha Lista de Jogos</h1>
-  <div class="container" id="lista-jogos"></div>
+	<body>
+	  <h1>🎮 Meu Catálogo de Jogos</h1>
+
+	  <!-- Tela de Listas -->
+	  <div id="tela-listas" class="tela ativa">
+	    <h2>Listas</h2>
+	    <div class="container" id="listas"></div>
+	  </div>
+
+	  <!-- Tela de Jogos -->
+	  <div id="tela-jogos" class="tela">
+	    <h2>Jogos</h2>
+	    <div class="container" id="jogos"></div>
+	    <button onclick="mostrarTela('tela-listas')">⬅️ Voltar para Listas</button>
+	  </div>
+
+	  <!-- Tela de Detalhes -->
+	  <div id="tela-detalhes" class="tela">
+	    <h2>Detalhes do Jogo</h2>
+	    <div id="detalhes"></div>
+	    <button onclick="mostrarTela('tela-jogos')">⬅️ Voltar para Jogos</button>
+	  </div>
 
   <script src="js/script.js"></script>
 </body>
