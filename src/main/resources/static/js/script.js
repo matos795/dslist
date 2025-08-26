@@ -1,3 +1,5 @@
+let dragSourceIndex = null; // variável global p/ saber de onde arrastou
+
 function mostrarTela(id) {
       document.querySelectorAll(".tela").forEach(t => t.classList.remove("ativa"));
       document.getElementById(id).classList.add("ativa");
@@ -31,15 +33,40 @@ function mostrarTela(id) {
         const container = document.getElementById("jogos");
         container.innerHTML = "";
 
-        jogos.forEach(jogo => {
+        jogos.forEach((jogo, index) => {
           const card = document.createElement("div");
           card.className = "card";
+		  card.draggable = true; // habilita drag
+		  card.dataset.index = index; // guarda a posição
+		  
           card.innerHTML = `
             <img src="${jogo.imgUrl}" alt="${jogo.title}">
             <h3>${jogo.title}</h3>
             <p><b>Ano:</b> ${jogo.year}</p>
           `;
-          card.onclick = () => carregarJogo(jogo.id);
+          card.ondblclick = () => carregarJogo(jogo.id);
+		  
+
+		  // eventos de drag & drop
+		  card.addEventListener("dragstart", (e) => {
+		    dragSourceIndex = index;
+		    e.dataTransfer.effectAllowed = "move";
+		  });
+
+		  card.addEventListener("dragover", (e) => {
+		    e.preventDefault(); // permite o drop
+		  });
+
+		  card.addEventListener("drop", async (e) => {
+		    e.preventDefault();
+		    const destinationIndex = parseInt(card.dataset.index);
+
+		    if (dragSourceIndex !== null && dragSourceIndex !== destinationIndex) {
+		      await atualizarOrdem(listaId, dragSourceIndex, destinationIndex);
+			  dragSourceIndex = null;
+		    }
+		  });
+		  
           container.appendChild(card);
         });
 
@@ -67,6 +94,8 @@ function mostrarTela(id) {
             <p><b>Saiba mais:</b> ${jogo.longDescription}</p>
           </div>
         `;
+		container.draggable = false;
+
 
         mostrarTela("tela-detalhes");
       } catch (error) {
@@ -76,3 +105,21 @@ function mostrarTela(id) {
 
     // inicia carregando listas
     carregarListas();
+	
+	
+	async function atualizarOrdem(listId, sourceIndex, destinationIndex) {
+	  try {
+	    await fetch(`http://localhost:8080/lists/${listId}/replacement`, {
+	      method: "POST",
+	      headers: { "Content-Type": "application/json" },
+	      body: JSON.stringify({ sourceIndex, destinationIndex })
+	    });
+
+	    console.log(`Movido de ${sourceIndex} para ${destinationIndex}`);
+	    // recarrega os jogos para atualizar a ordem vinda do backend
+	    carregarJogos(listId);
+
+	  } catch (error) {
+	    console.error("Erro ao atualizar ordem:", error);
+	  }
+	}
